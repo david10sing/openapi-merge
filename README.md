@@ -9,38 +9,92 @@ Welcome to the openapi-merge repository. This library is intended to be used for
 
 ### About this repository
 
-This is a multi-package repository that contains:
+This repository contains a Rust CLI tool for merging OpenAPI specification files. The tool can merge multiple OpenAPI files into a single file, handling path modifications, operation selection, component deduplication, and dispute resolution.
 
-* The openapi-merge library: [![npm](https://img.shields.io/npm/v/openapi-merge?label=openapi-merge&logo=npm)](https://bit.ly/2WnIytF)
-* The openapi-merge CLI tool: [![npm](https://img.shields.io/npm/v/openapi-merge-cli?label=openapi-merge-cli&logo=npm)](https://bit.ly/3bEVq3f)
+### Installation
 
-Depending on your use-case, you may wish to use the CLI tool or the library in your project. Please see the readme file of the specific package for more details.
+This project requires Rust (1.70 or later). To build from source:
+
+```bash
+cargo build --release
+```
+
+The binary will be located at `target/release/openapi-merge`.
+
+### Usage
+
+Create a configuration file `openapi-merge.json`:
+
+```json
+{
+  "inputs": [
+    {
+      "inputFile": "./api1.yaml",
+      "pathModification": {
+        "prepend": "/api/v1"
+      }
+    },
+    {
+      "inputURL": "https://example.com/api2.yaml",
+      "dispute": {
+        "prefix": "Api2"
+      }
+    }
+  ],
+  "output": "./merged.yaml",
+  "openapiVersion": "3.0.3"
+}
+```
+
+Run the tool:
+
+```bash
+openapi-merge --config openapi-merge.json
+```
+
+Or use the default configuration file name:
+
+```bash
+openapi-merge
+```
+
+### Configuration
+
+The configuration file supports:
+
+- **inputs**: Array of input OpenAPI files (from local files or URLs)
+- **output**: Output file path (YAML if `.yaml`/`.yml`, JSON otherwise)
+- **openapiVersion**: Optional OpenAPI version for output (defaults to version from first input)
+
+Each input can specify:
+- **pathModification**: Modify paths (stripStart, prepend)
+- **operationSelection**: Filter operations by tags (includeTags, excludeTags)
+- **description**: Merge description with optional markdown title
+- **dispute**: Resolve component name conflicts (prefix or suffix)
 
 ### Developing on openapi-merge
 
-This project is a multi-package repository and uses the [bolt][1] tool to manage these packages in one development experience.
+After checking out this repository, you can build and test:
 
-After checking out this repository, you can run the following command to install the required dependencies:
+```bash
+# Build
+cargo build
 
-``` shell
-bolt install
+# Run tests
+cargo test
+
+# Run the CLI
+cargo run -- --config openapi-merge.json
 ```
 
-You can then test running the CLI tool by running:
+### Features
 
-``` shell
-yarn cli
-```
-
-If you wish to ensure that you can develop on the `openapi-merge` library in parallel to the `openapi-merge-cli` tool
-then you must run the Typescript build for `openapi-merge` in watch mode. You can do this by:
-
-``` shell
-bolt w openapi-merge build -w
-```
-
-This will ensure that the Typescript is compiled into JavaScript so that it can be used by the `openapi-merge-cli` tool.
-
-For the other operations that you wish to perform, please see the package.json of the other packages in this repository.
-
- [1]: https://github.com/boltpkg/bolt
+- Merge multiple OpenAPI files into one
+- Path modifications (strip prefix, prepend prefix)
+- Operation selection by tags
+- Component deduplication with conflict resolution
+- Dispute resolution (prefix/suffix for conflicting component names)
+- Reference updating across merged documents
+- Support for both YAML and JSON input/output
+- Load files from local paths or URLs
+- Configurable OpenAPI version

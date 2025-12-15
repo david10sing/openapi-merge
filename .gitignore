@@ -11,3 +11,9 @@
 
 # don't lint nyc coverage output
 /coverage
+
+# Rust
+/target
+Cargo.lock
+**/*.rs.bk
+*.pdb
